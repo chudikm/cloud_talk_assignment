@@ -12,7 +12,7 @@ import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 
 import com.example.cloudtalk.messaging.RedisMessageSubscriber;
 
-@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
+@SpringBootApplication//(exclude = {DataSourceAutoConfiguration.class})
 public class CloudtalkApplication {
 
     @Bean
