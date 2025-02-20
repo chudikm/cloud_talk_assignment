@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -27,13 +28,18 @@ public class ProductService {
     private final ProductReviewSummaryRepository productReviewSummaryRepository;   
 
     public List<Product> getAllProducts() {
-        return productRepository.findAll();
+        List<Product> products = productRepository.findAll();
+        return products.stream().map(product -> {
+            product.setReviews(getReviews(product.getId()));
+            product.setProductReviewSummary(getProductReviewSummary(product.getId()));
+            return product;
+        }).collect(Collectors.toList());
     }
 
     public Optional<Product> getProductById(Long id) {
         return productRepository.findById(id).map(product -> {
             product.setReviews(getReviews(id));
-            product.setProductReviewSummary(getProductReviewSumary(id));
+            product.setProductReviewSummary(getProductReviewSummary(id));
             return product;
         });
     }
@@ -74,7 +80,7 @@ public class ProductService {
         return reviews;
     }
     
-    public ProductReviewSummary getProductReviewSumary(Long productId) {
+    public ProductReviewSummary getProductReviewSummary(Long productId) {
 
         log.info("USING CACHING for PRS");
         ProductReviewSummary cachedProductReviewSummary = redisCacheService.getProductReviewSummary(productId);

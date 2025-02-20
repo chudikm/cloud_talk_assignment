@@ -24,6 +24,9 @@ class ProductReviewSummaryServiceTest {
 
     @Mock
     private ProductReviewSummaryRepository summaryRepository;
+    
+    @Mock
+    private RedisCacheService redisCacheService;
 
     @InjectMocks
     private ProductReviewSummaryService summaryService;
@@ -54,6 +57,7 @@ class ProductReviewSummaryServiceTest {
         assertEquals(3, summary.getNumberOfReviews());
 
         verify(summaryRepository).save(summary);
+        verify(redisCacheService).deleteProductReviewSummary(1L);
     }
 
     @Test
@@ -66,6 +70,7 @@ class ProductReviewSummaryServiceTest {
         assertEquals(2, summary.getNumberOfReviews());
 
         verify(summaryRepository).save(summary);
+        verify(redisCacheService).deleteProductReviewSummary(1L);
     }
 
     @Test
@@ -78,6 +83,7 @@ class ProductReviewSummaryServiceTest {
         assertEquals(1, summary.getNumberOfReviews());
 
         verify(summaryRepository).save(summary);
+        verify(redisCacheService).deleteProductReviewSummary(1L);
     }
 
     @Test
@@ -92,5 +98,6 @@ class ProductReviewSummaryServiceTest {
         assertEquals(0, summary.getNumberOfReviews());
 
         verify(summaryRepository).save(summary);
+        verify(redisCacheService).deleteProductReviewSummary(1L);
     }
 }
