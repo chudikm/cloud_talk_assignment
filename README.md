@@ -116,8 +116,8 @@ stateDiagram-v2
     ReviewFetched --> UpdateFields : Update Review Fields
     UpdateFields --> SaveReview : Save Review in Database
     SaveReview --> PublishEvent : Publish Kafka Event
+    PublishEvent --> ClearCache : Clear Redis Cache
     PublishEvent --> NotifyExternalService : Notify External Service
-    NotifyExternalService --> ClearCache : Clear Redis Cache
     ClearCache --> [*]
 ```
 
