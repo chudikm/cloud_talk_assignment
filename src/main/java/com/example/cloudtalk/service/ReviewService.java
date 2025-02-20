@@ -1,11 +1,13 @@
 package com.example.cloudtalk.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
 import com.example.cloudtalk.messaging.RedisMessagePublisher;
 import com.example.cloudtalk.messaging.dto.ReviewUpdateMessage;
+import com.example.cloudtalk.model.Product;
 import com.example.cloudtalk.model.Review;
 import com.example.cloudtalk.repository.ProductRepository;
 import com.example.cloudtalk.repository.ReviewRepository;
@@ -41,7 +43,11 @@ public class ReviewService {
         List<Review> reviews = reviewRepository.findByProductId(productId);
         redisCacheService.saveReviews(productId, reviews);
         return reviews;
-    }        
+    }
+    
+    public Optional<Review> getReviewById(Long id) {
+        return reviewRepository.findById(id);
+    }
 
 
     public Review createReview(Long productId, Review review) {

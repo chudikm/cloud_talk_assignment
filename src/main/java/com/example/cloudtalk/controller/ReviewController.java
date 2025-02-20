@@ -1,5 +1,6 @@
 package com.example.cloudtalk.controller;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.cloudtalk.model.Review;
@@ -20,6 +21,14 @@ public class ReviewController {
     @GetMapping
     public List<Review> getAllReviews(@PathVariable Long productId) {
         return reviewService.getAllReviewsForProduct(productId);
+    }
+    
+    @GetMapping("/{reviewId}")
+    public ResponseEntity<Review> getReview(@PathVariable Long reviewId) {
+        return reviewService.getReviewById(reviewId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+
     }
 
     @PostMapping
