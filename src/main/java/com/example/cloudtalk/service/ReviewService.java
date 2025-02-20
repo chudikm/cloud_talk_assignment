@@ -1,7 +1,9 @@
 package com.example.cloudtalk.service;
 
+import java.time.Duration;
 import java.util.List;
 
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.example.cloudtalk.messaging.RedisMessagePublisher;
@@ -25,11 +27,21 @@ public class ReviewService {
     private final RedisMessagePublisher publisher;
     private final ObjectMapper objectMapper;
     private final NotificationService notificationService;
+    private RedisCacheService redisCacheService;
 
 
     public List<Review> getAllReviewsForProduct(Long productId) {
-        return reviewRepository.findByProductId(productId);
-    }
+        
+        List<Review> cachedReviews = redisCacheService.getReviews(productId);
+        if (cachedReviews != null) {
+            return cachedReviews; // Return cached reviews
+        }
+
+        List<Review> reviews = reviewRepository.findByProductId(productId);
+        redisCacheService.saveReviews(productId, reviews);
+        return reviews;
+    }        
+
 
     public Review createReview(Long productId, Review review) {
         return productRepository.findById(productId)
@@ -43,6 +55,7 @@ public class ReviewService {
                                     review.getId(),
                                     review.getRating())
                     );
+                    clearCache(review.getProduct().getId());
                     return savedReview;
                 }).orElseThrow(() -> new RuntimeException("Product not found"));
     }
@@ -63,6 +76,7 @@ public class ReviewService {
                                     review.getId(),
                                     review.getRating())
                     );
+                    clearCache(review.getProduct().getId());
                     return savedReview;
                 }).orElseThrow(() -> new RuntimeException("Review not found"));
     }
@@ -77,6 +91,7 @@ public class ReviewService {
                             review.getRating())
             );
             reviewRepository.delete(review);
+            clearCache(review.getProduct().getId());
         });
     }
     
@@ -87,6 +102,10 @@ public class ReviewService {
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Error sending Redis message", e);
         }
+    }
+    
+    private void clearCache(Long productId) {
+        redisCacheService.deleteReviews(productId);
     }
 
 }
