@@ -1,7 +1,5 @@
 package com.example.cloudtalk.messaging;
 
-import java.nio.charset.StandardCharsets;
-
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;

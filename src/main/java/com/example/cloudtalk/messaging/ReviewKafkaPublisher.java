@@ -4,7 +4,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import com.example.cloudtalk.messaging.dto.ReviewUpdateMessage;
-import com.example.cloudtalk.model.Review;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
