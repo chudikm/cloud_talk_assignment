@@ -9,11 +9,13 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.listener.PatternTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 import com.example.cloudtalk.messaging.RedisDLQMessageSubscriber;
 import com.example.cloudtalk.messaging.RedisMessageSubscriber;
 
-@SpringBootApplication//(exclude = {DataSourceAutoConfiguration.class})
+@SpringBootApplication
+@EnableAsync
 public class CloudtalkApplication {
 
     @Bean

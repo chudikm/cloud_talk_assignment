@@ -18,13 +18,13 @@ import lombok.AllArgsConstructor;
 @Service
 @AllArgsConstructor
 @Transactional
-
 public class ReviewService {
     
     private final ReviewRepository reviewRepository;
     private final ProductRepository productRepository;
     private final RedisMessagePublisher publisher;
     private final ObjectMapper objectMapper;
+    private final NotificationService notificationService;
 
 
     public List<Review> getAllReviewsForProduct(Long productId) {
@@ -37,6 +37,12 @@ public class ReviewService {
                     review.setProduct(product);
                     Review savedReview =  reviewRepository.save(review);
                     sendReviewUpdate(productId, null, savedReview.getRating());
+                    notificationService.notifyExternalService(
+                            String.format("Created: productId=%d, reviewId=%d, rating=%d", 
+                                    product.getId(), 
+                                    review.getId(),
+                                    review.getRating())
+                    );
                     return savedReview;
                 }).orElseThrow(() -> new RuntimeException("Product not found"));
     }
@@ -51,6 +57,12 @@ public class ReviewService {
                     review.setRating(updatedReview.getRating());
                     Review savedReview = reviewRepository.save(review);
                     sendReviewUpdate(review.getProduct().getId(), oldRating, savedReview.getRating());
+                    notificationService.notifyExternalService(
+                            String.format("Updated: productId=%d, reviewId=%d, rating=%d", 
+                                    review.getProduct().getId(), 
+                                    review.getId(),
+                                    review.getRating())
+                    );
                     return savedReview;
                 }).orElseThrow(() -> new RuntimeException("Review not found"));
     }
@@ -58,6 +70,12 @@ public class ReviewService {
     public void deleteReview(Long reviewId) {
         reviewRepository.findById(reviewId).ifPresent(review -> {
             sendReviewUpdate(review.getProduct().getId(), review.getRating(), null);
+            notificationService.notifyExternalService(
+                    String.format("Deleted: productId=%d, reviewId=%d, rating=%d", 
+                            review.getProduct().getId(), 
+                            review.getId(),
+                            review.getRating())
+            );
             reviewRepository.delete(review);
         });
     }
