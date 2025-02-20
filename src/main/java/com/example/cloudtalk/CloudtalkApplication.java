@@ -10,6 +10,7 @@ import org.springframework.data.redis.listener.PatternTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 
+import com.example.cloudtalk.messaging.RedisDLQMessageSubscriber;
 import com.example.cloudtalk.messaging.RedisMessageSubscriber;
 
 @SpringBootApplication//(exclude = {DataSourceAutoConfiguration.class})
@@ -17,10 +18,13 @@ public class CloudtalkApplication {
 
     @Bean
     RedisMessageListenerContainer container(RedisConnectionFactory connectionFactory,
-                                            MessageListenerAdapter listenerAdapter) {
+                                            MessageListenerAdapter listenerAdapter,
+                                            MessageListenerAdapter dlqListenerAdapter) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
         container.addMessageListener(listenerAdapter, new PatternTopic("cloudtalk-reviews"));
+        container.addMessageListener(dlqListenerAdapter, new PatternTopic("cloudtalk-reviews-dlq"));
+        
         return container;
     }
 
@@ -30,9 +34,15 @@ public class CloudtalkApplication {
     }
     
     @Bean
+    MessageListenerAdapter dlqListenerAdapter(RedisDLQMessageSubscriber dlqSubscriber) {
+        return new MessageListenerAdapter(dlqSubscriber, "onMessage");
+    }
+    
+    @Bean
     StringRedisTemplate template(RedisConnectionFactory connectionFactory) {
         return new StringRedisTemplate(connectionFactory);
     }
+    
     
     public static void main(String[] args) {
         SpringApplication.run(CloudtalkApplication.class, args);

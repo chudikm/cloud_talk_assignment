@@ -21,8 +21,6 @@ import lombok.AllArgsConstructor;
 
 public class ReviewService {
     
-    private static final String CHANNEL = "cloudtalk-reviews";
-
     private final ReviewRepository reviewRepository;
     private final ProductRepository productRepository;
     private final RedisMessagePublisher publisher;
@@ -67,7 +65,7 @@ public class ReviewService {
     private void sendReviewUpdate(Long productId, Integer oldRating, Integer newRating) {
         try {
             String message = objectMapper.writeValueAsString(new ReviewUpdateMessage(productId, oldRating, newRating));
-            publisher.publish(CHANNEL, message);
+            publisher.publishToReviews(message);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Error sending Redis message", e);
         }

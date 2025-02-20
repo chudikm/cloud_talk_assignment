@@ -11,7 +11,15 @@ public class RedisMessagePublisher {
 
     private final StringRedisTemplate redisTemplate;
 
-    public void publish(String channel, String message) {
-        redisTemplate.convertAndSend(channel, message);
+    private static final String CHANNEL_REVIEWS = "cloudtalk-reviews";
+    private static final String CHANNEL_DQL = "cloudtalk-reviews-dlq";
+    
+    
+    public void publishToReviews(String message) {
+        redisTemplate.convertAndSend(CHANNEL_REVIEWS, message);
+    }
+    
+    public void publishToDLQ( String message) {
+        redisTemplate.convertAndSend(CHANNEL_DQL, message);
     }
 }

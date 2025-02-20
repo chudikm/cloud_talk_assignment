@@ -16,7 +16,7 @@ public class MessageController {
     
     @PostMapping("/publish")
     public String publishMessage(@RequestParam String message) {
-        publisher.publish("cloudtalk-channel", message);
+        publisher.publishToReviews(message);
         return "Message published: " + message;
     }
 }
