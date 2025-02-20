@@ -11,7 +11,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.example.cloudtalk.messaging.RedisMessagePublisher;
+
+import com.example.cloudtalk.messaging.ReviewKafkaPublisher;
 import com.example.cloudtalk.messaging.dto.ReviewUpdateMessage;
 import com.example.cloudtalk.model.Product;
 import com.example.cloudtalk.model.Review;
@@ -30,7 +31,7 @@ class ReviewServiceTest {
     private ProductRepository productRepository;
 
     @Mock
-    private RedisMessagePublisher publisher;
+    private ReviewKafkaPublisher publisher;
 
     @Mock
     private ObjectMapper objectMapper;
@@ -83,7 +84,7 @@ class ReviewServiceTest {
     }
 
     @Test
-    void testCreateReview() {
+    void testCreateReview() throws Exception{
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         when(reviewRepository.save(review)).thenReturn(review);
 
@@ -93,24 +94,29 @@ class ReviewServiceTest {
         assertEquals(5, createdReview.getRating());
         verify(notificationService).notifyExternalService(anyString());
         verify(redisCacheService).deleteReviews(1L);
+        verify(publisher).publishReviewEvent(1L, null, 5);
     }
 
     @Test
-    void testUpdateReview() {
+    void testUpdateReview() throws Exception {
         when(reviewRepository.findById(1L)).thenReturn(Optional.of(review));
-        when(reviewRepository.save(review)).thenReturn(review);
+        Review newReview = new Review();
+        newReview.setId(1L);
+        newReview.setProduct(product);
+        newReview.setRating(4);
+        when(reviewRepository.save(newReview)).thenReturn(newReview);
 
-        review.setRating(4);
-        Review updatedReview = reviewService.updateReview(1L, review);
+        Review updatedReview = reviewService.updateReview(1L, newReview);
 
         assertNotNull(updatedReview);
         assertEquals(4, updatedReview.getRating());
         verify(notificationService).notifyExternalService(anyString());
         verify(redisCacheService).deleteReviews(1L);
+        verify(publisher).publishReviewEvent(1L, 5, 4);
     }
 
     @Test
-    void testDeleteReview() {
+    void testDeleteReview() throws Exception {
         when(reviewRepository.findById(1L)).thenReturn(Optional.of(review));
         doNothing().when(reviewRepository).delete(review);
 
@@ -119,5 +125,6 @@ class ReviewServiceTest {
         verify(reviewRepository, times(1)).delete(review);
         verify(notificationService).notifyExternalService(anyString());
         verify(redisCacheService).deleteReviews(1L);
+        verify(publisher).publishReviewEvent(1L, 5, null);
     }
 }

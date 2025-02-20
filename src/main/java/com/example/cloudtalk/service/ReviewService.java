@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import com.example.cloudtalk.messaging.RedisMessagePublisher;
+import com.example.cloudtalk.messaging.ReviewKafkaPublisher;
 import com.example.cloudtalk.messaging.dto.ReviewUpdateMessage;
 import com.example.cloudtalk.model.Product;
 import com.example.cloudtalk.model.Review;
@@ -26,7 +26,7 @@ public class ReviewService {
     
     private final ReviewRepository reviewRepository;
     private final ProductRepository productRepository;
-    private final RedisMessagePublisher publisher;
+    private final ReviewKafkaPublisher kafkaPublisher;
     private final ObjectMapper objectMapper;
     private final NotificationService notificationService;
     private RedisCacheService redisCacheService;
@@ -104,10 +104,10 @@ public class ReviewService {
     
     private void sendReviewUpdate(Long productId, Integer oldRating, Integer newRating) {
         try {
-            String message = objectMapper.writeValueAsString(new ReviewUpdateMessage(productId, oldRating, newRating));
-            publisher.publishToReviews(message);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error sending Redis message", e);
+            kafkaPublisher.publishReviewEvent(productId, oldRating, newRating);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error sending message for summary calculation", e);
         }
     }
     

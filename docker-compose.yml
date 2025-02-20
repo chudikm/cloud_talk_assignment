@@ -7,6 +7,7 @@ services:
     depends_on:
       - postgres
       - redis
+      - kafka
     environment:
        - SPRING_PROFILES_ACTIVE=docker
     ports:
@@ -38,6 +39,29 @@ services:
       interval: 5s
       retries: 5
       start_period: 5s  
+      
+  zookeeper:
+      image: confluentinc/cp-zookeeper:latest
+      container_name: cloudtalk-zookeeper
+      environment:
+        ZOOKEEPER_CLIENT_PORT: 2181
+      networks:
+        - cloudtalk-network  
+
+  kafka:
+     image: confluentinc/cp-kafka:latest
+     container_name: cloudtalk-kafka
+     depends_on:
+       - zookeeper
+     ports:
+       - "9092:9092"
+     networks:
+       - cloudtalk-network  
+     environment:
+       KAFKA_BROKER_ID: 1
+       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1   
 
 networks:
   cloudtalk-network:
