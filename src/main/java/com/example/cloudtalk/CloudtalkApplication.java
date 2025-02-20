@@ -18,6 +18,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 
 import com.example.cloudtalk.messaging.RedisDLQMessageSubscriber;
 import com.example.cloudtalk.messaging.RedisMessageSubscriber;
+import com.example.cloudtalk.model.ProductReviewSummary;
 import com.example.cloudtalk.model.Review;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -65,6 +66,27 @@ public class CloudtalkApplication {
         Jackson2JsonRedisSerializer<List<Review>> serializer = new Jackson2JsonRedisSerializer<>(
                 objectMapper.getTypeFactory().constructCollectionType(
                         List.class, Review.class)
+        );
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(serializer);
+
+        template.afterPropertiesSet();
+        return template;
+    }
+    
+    @Bean
+    public RedisTemplate<String, ProductReviewSummary> redisProductReviewSummaryTemplate(
+            RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, ProductReviewSummary> template = new RedisTemplate<>();
+        template.setConnectionFactory(redisConnectionFactory);
+
+        // Configure Jackson serializer for lists of Review
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.findAndRegisterModules(); 
+
+        // Use JSON Serialization
+        Jackson2JsonRedisSerializer<ProductReviewSummary> serializer = new Jackson2JsonRedisSerializer<>(
+                ProductReviewSummary.class
         );
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(serializer);

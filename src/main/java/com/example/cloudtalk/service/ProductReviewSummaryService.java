@@ -16,8 +16,8 @@ import java.math.RoundingMode;
 public class ProductReviewSummaryService {
 
     private final ProductRepository productRepository;
-    private final ReviewRepository reviewRepository;
     private final ProductReviewSummaryRepository summaryRepository;
+    private final RedisCacheService redisCacheService;
 
     @Transactional
     public void updateProductReviewSummary(Long productId, Integer oldRating, Integer newRating) {
@@ -61,5 +61,6 @@ public class ProductReviewSummaryService {
         summary.setAverageReview(avgRating);
         summary.setNumberOfReviews(numReviews);
         summaryRepository.save(summary);
+        redisCacheService.deleteProductReviewSummary(productId);
     }
 }

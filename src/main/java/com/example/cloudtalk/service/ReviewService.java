@@ -1,9 +1,7 @@
 package com.example.cloudtalk.service;
 
-import java.time.Duration;
 import java.util.List;
 
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.example.cloudtalk.messaging.RedisMessagePublisher;
@@ -16,10 +14,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @AllArgsConstructor
 @Transactional
+@Slf4j
 public class ReviewService {
     
     private final ReviewRepository reviewRepository;
@@ -34,6 +34,7 @@ public class ReviewService {
         
         List<Review> cachedReviews = redisCacheService.getReviews(productId);
         if (cachedReviews != null) {
+            log.info("USING CACHED VALUES FOR REVIEWS");
             return cachedReviews; // Return cached reviews
         }
 

@@ -1,8 +1,10 @@
 package com.example.cloudtalk.service;
 
 import com.example.cloudtalk.model.Product;
+import com.example.cloudtalk.model.ProductReviewSummary;
 import com.example.cloudtalk.model.Review;
 import com.example.cloudtalk.repository.ProductRepository;
+import com.example.cloudtalk.repository.ProductReviewSummaryRepository;
 import com.example.cloudtalk.repository.ReviewRepository;
 
 import jakarta.transaction.Transactional;
@@ -22,6 +24,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final RedisCacheService redisCacheService;
     private final ReviewRepository reviewRepository;
+    private final ProductReviewSummaryRepository productReviewSummaryRepository;   
 
     public List<Product> getAllProducts() {
         return productRepository.findAll();
@@ -30,7 +33,7 @@ public class ProductService {
     public Optional<Product> getProductById(Long id) {
         return productRepository.findById(id).map(product -> {
             product.setReviews(getReviews(id));
-            //product.setProductReviewSummary(getProductReviewSummary(id)); // Use cached summary
+            product.setProductReviewSummary(getProductReviewSumary(id));
             return product;
         });
     }
@@ -62,6 +65,7 @@ public class ProductService {
         List<Review> cachedReviews = redisCacheService.getReviews(productId);
         
         if (cachedReviews != null) {
+            log.info("USING CACHED VALUE for REVIEWS");
             return cachedReviews;
         }
 
@@ -70,7 +74,29 @@ public class ProductService {
         return reviews;
     }
     
+    public ProductReviewSummary getProductReviewSumary(Long productId) {
+
+        log.info("USING CACHING for PRS");
+        ProductReviewSummary cachedProductReviewSummary = redisCacheService.getProductReviewSummary(productId);
+        
+        if (cachedProductReviewSummary != null) {
+            log.info("USING CACHED VALUE for PRS");
+            return cachedProductReviewSummary;
+        }
+
+        Optional<ProductReviewSummary> productReviewSummary = productReviewSummaryRepository.findByProductId(productId);
+        if (productReviewSummary.isPresent()) {
+            redisCacheService.saveProductReviewSummary(productId, productReviewSummary.get());
+            return productReviewSummary.get();
+        }
+        else {
+            clearCache(productId);
+        }
+        return null;
+    }
+    
     public void clearCache(Long productId) {
         redisCacheService.deleteReviews(productId);
+        redisCacheService.deleteProductReviewSummary(productId);
     }
 }
