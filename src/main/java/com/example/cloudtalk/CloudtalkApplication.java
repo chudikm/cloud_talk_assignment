@@ -20,7 +20,7 @@ public class CloudtalkApplication {
                                             MessageListenerAdapter listenerAdapter) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
-        container.addMessageListener(listenerAdapter, new PatternTopic("cloudtalk-channel"));
+        container.addMessageListener(listenerAdapter, new PatternTopic("cloudtalk-reviews"));
         return container;
     }
 
