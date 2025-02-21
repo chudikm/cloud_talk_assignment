@@ -41,7 +41,7 @@ class ProductReviewSummaryServiceTest {
         product = new Product();
         product.setId(1L);
 
-        summary = new ProductReviewSummary(1L, product, new BigDecimal("4.00"), 2);
+        summary = new ProductReviewSummary(product, new BigDecimal("4.00"), 2);
 
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         when(summaryRepository.findByProductId(1L)).thenReturn(Optional.of(summary));

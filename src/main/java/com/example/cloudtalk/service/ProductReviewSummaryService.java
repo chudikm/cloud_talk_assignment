@@ -25,7 +25,7 @@ public class ProductReviewSummaryService {
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
         ProductReviewSummary summary = summaryRepository.findByProductId(productId)
-                .orElseGet(() -> new ProductReviewSummary(null, product, BigDecimal.ZERO, 0));
+                .orElseGet(() -> new ProductReviewSummary(product, BigDecimal.ZERO, 0));
 
         int numReviews = summary.getNumberOfReviews();
         BigDecimal avgRating = summary.getAverageReview();

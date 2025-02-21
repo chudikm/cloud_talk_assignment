@@ -49,7 +49,7 @@ class ProductServiceTest {
     void setUp() {
         product = new Product(1L, "Test Product", "Description", BigDecimal.valueOf(99.99), null, null);
         review = new Review(1L, "John", "Doe", "Great product!", 5, product);
-        productReviewSummary = new ProductReviewSummary(1L, product, BigDecimal.valueOf(4.5), 10);
+        productReviewSummary = new ProductReviewSummary(product, BigDecimal.valueOf(4.5), 10);
     }
 
     @Test

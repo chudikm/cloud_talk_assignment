@@ -12,7 +12,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Entity
 @Table(name = "product_review_summaries")
 @NoArgsConstructor
-@AllArgsConstructor
 @Data
 public class ProductReviewSummary {
 
@@ -24,9 +23,18 @@ public class ProductReviewSummary {
     @JoinColumn(name = "product_id")
     @JsonIgnore
     private Product product;
+    
+    @Version
+    private Long version;
 
     private BigDecimal averageReview;
     private int numberOfReviews;
+    
+    public ProductReviewSummary(Product product, BigDecimal averageReview, int numberOfReviews) {
+        this.product = product;
+        this.averageReview = averageReview;
+        this.numberOfReviews = numberOfReviews;
+    }
 
     public void updateSummary(BigDecimal newAverage, int totalReviews) {
         this.averageReview = newAverage;
